@@ -1,26 +1,18 @@
-import { useState } from 'react';
 import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
-import { getMonths, getPostsByMonth, MonthEntry, Post } from '../../src/api/client';
+import { getPosts } from '../../src/api/client';
 import { useAuthStore } from '../../src/store/auth';
 import { usePostsStore } from '../../src/store/posts';
 
-export default function HomeScreen() {
+export default function RecentScreen() {
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
   const setSelectedPost = usePostsStore((s) => s.setSelectedPost);
-  const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
-  const { data: months, isLoading: loadingMonths } = useQuery({
-    queryKey: ['months'],
-    queryFn: getMonths,
-  });
-
-  const { data: posts, isLoading: loadingPosts } = useQuery({
-    queryKey: ['posts', selectedMonth],
-    queryFn: () => getPostsByMonth(selectedMonth!),
-    enabled: !!selectedMonth,
+  const { data, isLoading } = useQuery({
+    queryKey: ['recent'],
+    queryFn: () => getPosts({ $limit: 30 }),
   });
 
   function handleLogout() {
@@ -32,8 +24,8 @@ export default function HomeScreen() {
       <View style={styles.header}>
         <Text style={styles.title}>pa2026</Text>
         <View style={styles.headerActions}>
-          <TouchableOpacity onPress={() => router.push('/(app)/recent')} style={styles.navBtn}>
-            <Text style={styles.navBtnText}>Recent</Text>
+          <TouchableOpacity onPress={() => router.push('/(app)/history')} style={styles.navBtn}>
+            <Text style={styles.navBtnText}>History</Text>
           </TouchableOpacity>
           <TouchableOpacity onPress={() => router.push('/(app)/search')} style={styles.navBtn}>
             <Text style={styles.navBtnText}>Search</Text>
@@ -47,53 +39,24 @@ export default function HomeScreen() {
         </View>
       </View>
 
-      <View style={styles.columns}>
-        {/* Months list */}
-        <View style={styles.monthsPanel}>
-          {loadingMonths ? (
-            <ActivityIndicator color="#4a9eff" style={{ marginTop: 20 }} />
-          ) : (
-            <FlatList
-              data={months}
-              keyExtractor={(item) => item.ym}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={[styles.monthItem, selectedMonth === item.ym && styles.monthItemActive]}
-                  onPress={() => setSelectedMonth(item.ym)}
-                >
-                  <Text style={styles.monthText}>{item.m}/{item.y}</Text>
-                  <Text style={styles.monthCount}>{item.count}</Text>
-                </TouchableOpacity>
-              )}
-            />
+      {isLoading ? (
+        <ActivityIndicator color="#4a9eff" style={{ marginTop: 40 }} />
+      ) : (
+        <FlatList
+          data={data?.data}
+          keyExtractor={(item) => String(item.id)}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.item}
+              onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
+            >
+              <Text style={styles.date}>{item.date.slice(0, 10)}</Text>
+              <Text style={styles.preview} numberOfLines={2}>{item.body}</Text>
+            </TouchableOpacity>
           )}
-        </View>
+        />
+      )}
 
-        {/* Posts list */}
-        <View style={styles.postsPanel}>
-          {!selectedMonth ? (
-            <Text style={styles.placeholder}>← Select a month</Text>
-          ) : loadingPosts ? (
-            <ActivityIndicator color="#4a9eff" style={{ marginTop: 20 }} />
-          ) : (
-            <FlatList
-              data={posts}
-              keyExtractor={(item) => String(item.id)}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.postItem}
-                  onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
-                >
-                  <Text style={styles.postDate}>{item.date.slice(0, 10)}</Text>
-                  <Text style={styles.postPreview} numberOfLines={2}>{item.body}</Text>
-                </TouchableOpacity>
-              )}
-            />
-          )}
-        </View>
-      </View>
-
-      {/* Compose FAB */}
       <TouchableOpacity style={styles.fab} onPress={() => router.push('/(app)/compose')}>
         <Text style={styles.fabText}>+</Text>
       </TouchableOpacity>
@@ -116,17 +79,9 @@ const styles = StyleSheet.create({
   headerActions: { flexDirection: 'row', gap: 12 },
   navBtn: { paddingHorizontal: 8, paddingVertical: 4 },
   navBtnText: { color: '#4a9eff', fontSize: 14 },
-  columns: { flex: 1, flexDirection: 'row' },
-  monthsPanel: { width: 90, borderRightWidth: 1, borderRightColor: '#222' },
-  monthItem: { padding: 10, borderBottomWidth: 1, borderBottomColor: '#1a1a1a' },
-  monthItemActive: { backgroundColor: '#1a2a3a' },
-  monthText: { color: '#aaa', fontSize: 13 },
-  monthCount: { color: '#555', fontSize: 11, marginTop: 2 },
-  postsPanel: { flex: 1 },
-  placeholder: { color: '#555', textAlign: 'center', marginTop: 40, fontSize: 14 },
-  postItem: { padding: 14, borderBottomWidth: 1, borderBottomColor: '#1a1a1a' },
-  postDate: { color: '#4a9eff', fontSize: 12, marginBottom: 4 },
-  postPreview: { color: '#ccc', fontSize: 14, lineHeight: 20 },
+  item: { padding: 16, borderBottomWidth: 1, borderBottomColor: '#1a1a1a' },
+  date: { color: '#4a9eff', fontSize: 12, marginBottom: 4 },
+  preview: { color: '#ccc', fontSize: 14, lineHeight: 20 },
   fab: {
     position: 'absolute',
     bottom: 32,
