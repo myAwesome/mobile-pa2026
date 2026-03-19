@@ -22,7 +22,7 @@ export default function PostScreen() {
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <Text style={styles.date}>{post.date.slice(0, 10)}</Text>
 
-          {post.periods.length > 0 && (
+          {(post.periods ?? []).length > 0 && (
             <View style={styles.tagRow}>
               {post.periods.map((p) => (
                 <View key={p.id} style={styles.periodTag}>
@@ -32,7 +32,7 @@ export default function PostScreen() {
             </View>
           )}
 
-          {post.labels.length > 0 && (
+          {(post.labels ?? []).length > 0 && (
             <View style={styles.tagRow}>
               {post.labels.map((l) => (
                 <View key={l.id} style={styles.labelTag}>
@@ -44,7 +44,7 @@ export default function PostScreen() {
 
           <Text style={styles.body}>{post.body}</Text>
 
-          {post.comments.length > 0 && (
+          {(post.comments ?? []).length > 0 && (
             <View style={styles.commentsSection}>
               <Text style={styles.commentsTitle}>Comments ({post.comments.length})</Text>
               {post.comments.map((c) => (
@@ -56,7 +56,9 @@ export default function PostScreen() {
             </View>
           )}
         </ScrollView>
-      ) : null}
+      ) : (
+        <Text style={styles.empty}>No post selected</Text>
+      )}
     </View>
   );
 }
@@ -83,6 +85,7 @@ const styles = StyleSheet.create({
   labelTag: { backgroundColor: '#1a1a2a', borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   labelText: { color: '#6a9abf', fontSize: 12 },
   body: { color: '#e0e0e0', fontSize: 16, lineHeight: 26, marginTop: 8 },
+  empty: { color: '#555', textAlign: 'center', marginTop: 40, fontSize: 14 },
   commentsSection: { marginTop: 32, borderTopWidth: 1, borderTopColor: '#222', paddingTop: 16 },
   commentsTitle: { color: '#555', fontSize: 12, marginBottom: 12 },
   comment: { marginBottom: 16 },
