@@ -22,7 +22,9 @@
         "backgroundImage": "./assets/android-icon-background.png",
         "monochromeImage": "./assets/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "usesCleartextTraffic": true,
+      "predictiveBackGestureEnabled": false,
+      "package": "com.asolop.mobilepa2026"
     },
     "web": {
       "favicon": "./assets/favicon.png"
@@ -30,6 +32,12 @@
     "plugins": [
       "expo-router",
       "expo-secure-store"
-    ]
+    ],
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "fa76a6b3-238c-496d-9b3b-4da8ef0da012"
+      }
+    }
   }
 }
