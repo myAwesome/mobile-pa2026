@@ -105,6 +105,10 @@ export async function getPosts(params: { $limit?: number; $skip?: number } = {})
   return request<PaginatedResponse<Post>>(`/posts?${qs}`);
 }
 
+export async function getPost(id: number): Promise<Post> {
+  return request<Post>(`/posts/${id}`);
+}
+
 export async function createPost(body: string, date: string): Promise<Post> {
   return request<Post>('/posts', {
     method: 'POST',
