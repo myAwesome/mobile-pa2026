@@ -6,15 +6,17 @@ import {
 import { useRouter, useLocalSearchParams } from 'expo-router';
 import { useQueryClient } from '@tanstack/react-query';
 import { createPost, updatePost } from '../../src/api/client';
+import { usePostsStore } from '../../src/store/posts';
 
 export default function ComposeScreen() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { id } = useLocalSearchParams<{ id?: string }>();
+  const selectedPost = usePostsStore((s) => s.selectedPost);
 
   const today = new Date().toISOString().slice(0, 10);
-  const [date, setDate] = useState(today);
-  const [body, setBody] = useState('');
+  const [date, setDate] = useState(id && selectedPost ? selectedPost.date.slice(0, 10) : today);
+  const [body, setBody] = useState(id && selectedPost ? selectedPost.body : '');
   const [loading, setLoading] = useState(false);
 
   async function handleSave() {
