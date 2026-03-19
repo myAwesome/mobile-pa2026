@@ -1,17 +1,11 @@
-import { ScrollView, View, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
+import { ScrollView, View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useQuery } from '@tanstack/react-query';
-import { getPost } from '../../../src/api/client';
+import { usePostsStore } from '../../../src/store/posts';
 
 export default function PostScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const router = useRouter();
-
-  const { data: post, isLoading, error } = useQuery({
-    queryKey: ['post', id],
-    queryFn: () => getPost(Number(id)),
-    enabled: !!id,
-  });
+  const post = usePostsStore((s) => s.selectedPost);
 
   return (
     <View style={styles.container}>
@@ -24,11 +18,7 @@ export default function PostScreen() {
         </TouchableOpacity>
       </View>
 
-      {isLoading ? (
-        <ActivityIndicator color="#4a9eff" style={{ marginTop: 40 }} />
-      ) : error ? (
-        <Text style={styles.error}>Failed to load post</Text>
-      ) : post ? (
+      {post ? (
         <ScrollView style={styles.scroll} contentContainerStyle={styles.content}>
           <Text style={styles.date}>{post.date.slice(0, 10)}</Text>
 
@@ -93,7 +83,6 @@ const styles = StyleSheet.create({
   labelTag: { backgroundColor: '#1a1a2a', borderRadius: 4, paddingHorizontal: 8, paddingVertical: 3 },
   labelText: { color: '#6a9abf', fontSize: 12 },
   body: { color: '#e0e0e0', fontSize: 16, lineHeight: 26, marginTop: 8 },
-  error: { color: '#ff6b6b', textAlign: 'center', marginTop: 40 },
   commentsSection: { marginTop: 32, borderTopWidth: 1, borderTopColor: '#222', paddingTop: 16 },
   commentsTitle: { color: '#555', fontSize: 12, marginBottom: 12 },
   comment: { marginBottom: 16 },

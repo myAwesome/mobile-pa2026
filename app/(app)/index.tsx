@@ -4,10 +4,12 @@ import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getMonths, getPostsByMonth, MonthEntry, Post } from '../../src/api/client';
 import { useAuthStore } from '../../src/store/auth';
+import { usePostsStore } from '../../src/store/posts';
 
 export default function HomeScreen() {
   const router = useRouter();
   const logout = useAuthStore((s) => s.logout);
+  const setSelectedPost = usePostsStore((s) => s.setSelectedPost);
   const [selectedMonth, setSelectedMonth] = useState<string | null>(null);
 
   const { data: months, isLoading: loadingMonths } = useQuery({
@@ -80,7 +82,7 @@ export default function HomeScreen() {
               renderItem={({ item }) => (
                 <TouchableOpacity
                   style={styles.postItem}
-                  onPress={() => router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } })}
+                  onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
                 >
                   <Text style={styles.postDate}>{item.date.slice(0, 10)}</Text>
                   <Text style={styles.postPreview} numberOfLines={2}>{item.body}</Text>
