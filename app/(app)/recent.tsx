@@ -2,9 +2,11 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator }
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../../src/api/client';
+import { usePostsStore } from '../../src/store/posts';
 
 export default function RecentScreen() {
   const router = useRouter();
+  const setSelectedPost = usePostsStore((s) => s.setSelectedPost);
   const { data, isLoading } = useQuery({
     queryKey: ['recent'],
     queryFn: () => getPosts({ $limit: 30 }),
@@ -28,7 +30,7 @@ export default function RecentScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.item}
-              onPress={() => router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } })}
+              onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
             >
               <Text style={styles.date}>{item.date.slice(0, 10)}</Text>
               <Text style={styles.preview} numberOfLines={2}>{item.body}</Text>

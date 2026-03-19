@@ -96,12 +96,13 @@ export async function logout() {
 }
 
 // Posts
-export async function getPosts(params: { $limit?: number; $skip?: number } = {}): Promise<PaginatedResponse<Post>> {
+export async function getPosts(params: { $limit?: number; $skip?: number; search?: string } = {}): Promise<PaginatedResponse<Post>> {
   const qs = new URLSearchParams({
     '$limit': String(params.$limit ?? 30),
     '$skip': String(params.$skip ?? 0),
     '$sort[date]': '-1',
   });
+  if (params.search) qs.set('body[$search]', params.search);
   return request<PaginatedResponse<Post>>(`/posts?${qs}`);
 }
 

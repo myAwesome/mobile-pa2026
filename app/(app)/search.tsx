@@ -3,15 +3,17 @@ import { View, Text, TextInput, FlatList, TouchableOpacity, StyleSheet, Activity
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getPosts } from '../../src/api/client';
+import { usePostsStore } from '../../src/store/posts';
 
 export default function SearchScreen() {
   const router = useRouter();
+  const setSelectedPost = usePostsStore((s) => s.setSelectedPost);
   const [query, setQuery] = useState('');
   const [search, setSearch] = useState('');
 
   const { data, isLoading } = useQuery({
     queryKey: ['search', search],
-    queryFn: () => getPosts({ $limit: 50 }),
+    queryFn: () => getPosts({ $limit: 50, search }),
     enabled: search.length > 1,
   });
 
@@ -47,7 +49,7 @@ export default function SearchScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.item}
-              onPress={() => router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } })}
+              onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
             >
               <Text style={styles.date}>{item.date.slice(0, 10)}</Text>
               <Text style={styles.preview} numberOfLines={2}>{item.body}</Text>

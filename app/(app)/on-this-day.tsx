@@ -2,9 +2,11 @@ import { View, Text, FlatList, TouchableOpacity, StyleSheet, ActivityIndicator }
 import { useRouter } from 'expo-router';
 import { useQuery } from '@tanstack/react-query';
 import { getOnThisDay } from '../../src/api/client';
+import { usePostsStore } from '../../src/store/posts';
 
 export default function OnThisDayScreen() {
   const router = useRouter();
+  const setSelectedPost = usePostsStore((s) => s.setSelectedPost);
   const today = new Date();
   const md = `${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
 
@@ -34,7 +36,7 @@ export default function OnThisDayScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.item}
-              onPress={() => router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } })}
+              onPress={() => { setSelectedPost(item); router.push({ pathname: '/(app)/post/[id]', params: { id: item.id } }); }}
             >
               <Text style={styles.date}>{item.date.slice(0, 10)}</Text>
               <Text style={styles.preview} numberOfLines={2}>{item.body}</Text>
